@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006-2018 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006-2016 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -10,12 +10,20 @@
 // +----------------------------------------------------------------------
 
 // [ 应用入口文件 ]
-namespace think;
 
-// 加载基础文件
-require __DIR__ . '/../thinkphp/base.php';
+// 定义应用目录
+define('APP_PATH', __DIR__ . '/../application/');
+// 定义日志目录
+define('LOG_PATH', __DIR__ . '/../log/');
+// 加载框架引导文件
+require __DIR__ . '/../thinkphp/start.php';
 
-// 支持事先使用静态方法设置Request对象和Config对象
+\think\Log::init([
+    'type' => 'File',
+    'path' => LOG_PATH,
+    'level' => ['sql'],
+]);
 
-// 执行应用并响应
-Container::get('app')->run()->send();
+//  TODO:判断手机号的时候还要加上座机号，如020-23888888
+
+//  TODO：更改CMS系统保存用户的账号密码的方式，现为明文保存

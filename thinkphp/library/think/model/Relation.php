@@ -2,7 +2,7 @@
 // +----------------------------------------------------------------------
 // | ThinkPHP [ WE CAN DO IT JUST THINK ]
 // +----------------------------------------------------------------------
-// | Copyright (c) 2006~2018 http://thinkphp.cn All rights reserved.
+// | Copyright (c) 2006~2017 http://thinkphp.cn All rights reserved.
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
@@ -33,10 +33,10 @@ abstract class Relation
     protected $foreignKey;
     // 关联表主键
     protected $localKey;
+    // 关联查询参数
+    protected $option;
     // 基础查询
     protected $baseQuery;
-    // 是否为自关联
-    protected $selfRelation;
 
     /**
      * 获取关联的所属模型
@@ -49,41 +49,29 @@ abstract class Relation
     }
 
     /**
-     * 获取当前的关联模型类的实例
+     * 获取当前的关联模型类
      * @access public
-     * @return Model
+     * @return string
      */
     public function getModel()
     {
-        return $this->query->getModel();
+        return $this->model;
     }
 
     /**
-     * 设置当前关联为自关联
+     * 获取关联的查询对象
      * @access public
-     * @param  bool $self 是否自关联
-     * @return $this
+     * @return Query
      */
-    public function selfRelation($self = true)
+    public function getQuery()
     {
-        $this->selfRelation = $self;
-        return $this;
-    }
-
-    /**
-     * 当前关联是否为自关联
-     * @access public
-     * @return bool
-     */
-    public function isSelfRelation()
-    {
-        return $this->selfRelation;
+        return $this->query;
     }
 
     /**
      * 封装关联数据集
      * @access public
-     * @param  array $resultSet 数据集
+     * @param array $resultSet 数据集
      * @return mixed
      */
     protected function resultSetBuild($resultSet)
@@ -91,64 +79,23 @@ abstract class Relation
         return (new $this->model)->toCollection($resultSet);
     }
 
-    protected function getQueryFields($model)
-    {
-        $fields = $this->query->getOptions('field');
-        return $this->getRelationQueryFields($fields, $model);
-    }
-
-    protected function getRelationQueryFields($fields, $model)
-    {
-        if ($fields) {
-
-            if (is_string($fields)) {
-                $fields = explode(',', $fields);
-            }
-
-            foreach ($fields as &$field) {
-                if (false === strpos($field, '.')) {
-                    $field = $model . '.' . $field;
-                }
-            }
-        } else {
-            $fields = $model . '.*';
-        }
-
-        return $fields;
-    }
-
-    protected function getQueryWhere(&$where, $relation)
-    {
-        foreach ($where as $key => &$val) {
-            if (is_string($key)) {
-                $where[] = [false === strpos($key, '.') ? $relation . '.' . $key : $key, '=', $val];
-                unset($where[$key]);
-            } elseif (isset($val[0]) && false === strpos($val[0], '.')) {
-                $val[0] = $relation . '.' . $val[0];
-            }
-        }
-    }
-
     /**
-     * 删除记录
+     * 移除关联查询参数
      * @access public
-     * @param  mixed $data 表达式 true 表示强制删除
-     * @return int
-     * @throws Exception
-     * @throws PDOException
+     * @return $this
      */
-    public function delete($data = null)
+    public function removeOption()
     {
-        return $this->query->delete($data);
+        $this->query->removeOption();
+        return $this;
     }
 
     /**
-     * 执行基础查询（仅执行一次）
+     * 执行基础查询（进执行一次）
      * @access protected
      * @return void
      */
-    protected function baseQuery()
-    {}
+    abstract protected function baseQuery();
 
     public function __call($method, $args)
     {
@@ -156,9 +103,15 @@ abstract class Relation
             // 执行基础查询
             $this->baseQuery();
 
-            $result = call_user_func_array([$this->query->getModel(), $method], $args);
-
-            return $result === $this->query && !in_array(strtolower($method), ['fetchsql', 'fetchpdo']) ? $this : $result;
+            $result = call_user_func_array([$this->query, $method], $args);
+            if ($result instanceof Query) {
+                $this->option = $result->getOptions();
+                return $this;
+            } else {
+                $this->option    = [];
+                $this->baseQuery = false;
+                return $result;
+            }
         } else {
             throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
         }
