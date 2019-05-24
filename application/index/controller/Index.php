@@ -25,7 +25,7 @@ class Index
 //        Container::getInstance()->set('Car', '\di\Car');
 
 //        $obj = Container::getInstance()->get('di\Car');
-//        dump('hello');
+        dump('hello');
 //        dump($obj);
 //        dump($obj->buy());
     }
