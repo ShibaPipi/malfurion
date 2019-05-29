@@ -4,6 +4,8 @@ namespace app\common\model;
 
 class Category extends BaseModel
 {
+    protected $hidden = ['update_time', 'delete_time'];
+
     public function products()
     {
         return $this->hasMany('Product', 'category_id', 'id');

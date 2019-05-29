@@ -1,8 +1,6 @@
 <?php
 
-namespace app\api\model;
-
-use think\Model;
+namespace app\common\model;
 
 class ThirdApp extends BaseModel
 {

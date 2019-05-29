@@ -1,21 +1,13 @@
 <?php
-/**
- * Created by 七月.
- * User: 七月
- * Date: 2017/2/16
- * Time: 1:59
- */
 
-namespace app\api\model;
-
+namespace app\common\model;
 
 use app\lib\exception\ProductException;
 use app\lib\exception\ThemeException;
-use think\Model;
 
 class Theme extends BaseModel
 {
-    protected $hidden = ['delete_time', 'topic_img_id', 'head_img_id'];
+    protected $hidden = ['update_time', 'delete_time', 'topic_img_id', 'head_img_id'];
 
     /**
      * 关联Image
@@ -37,20 +29,20 @@ class Theme extends BaseModel
      */
     public function products()
     {
-        return $this->belongsToMany(
-            'Product', 'theme_product', 'product_id', 'theme_id');
+        return $this->belongsToMany('Product', 'theme_product', 'product_id', 'theme_id');
     }
 
     public function getThemes()
     {
 
     }
-    
+
     public static function getThemeWithProducts($id)
     {
-        $themes = self::with('products,topicImg,headImg')
-            ->find($id);
-        return $themes;
+//        $theme = self::find($id);
+        $theme = self::with('products,topicImg,headImg')->find($id);
+//halt($theme);
+        return $theme;
     }
 
     /**
@@ -60,8 +52,7 @@ class Theme extends BaseModel
      */
     public static function getThemeList($ids)
     {
-        if (empty($ids))
-        {
+        if (empty($ids)) {
             return [];
         }
         // 讲解with的用法和如何预加载关联属性的关联属性
@@ -69,6 +60,7 @@ class Theme extends BaseModel
         $themes = self::with('products,img')
 //            ->with('products.imgs')
             ->select($ids);
+
         return $themes;
         //        foreach ($themes as $theme) {
         //            foreach($theme->products as $product){
@@ -90,31 +82,32 @@ class Theme extends BaseModel
         // 数据，写入不成功，但TP并不会报错
         // 最好是在插入前先做一边查询检查
 
-        $models['theme']->products()
-            ->attach($productID);
+        $models['theme']->products()->attach($productID);
+
         return true;
     }
 
     public static function deleteThemeProduct($themeID, $productID)
     {
         $models = self::checkRelationExist($themeID, $productID);
-        $models['theme']->products()
-            ->detach($productID);
+        $models['theme']->products()->detach($productID);
+
         return true;
     }
 
     private static function checkRelationExist($themeID, $productID)
     {
         $theme = self::get($themeID);
-        if (!$theme)
-        {
-          throw new ThemeException(); 
+
+        if (!$theme) {
+            throw new ThemeException();
         }
         $product = Product::get($productID);
-        if (!$product)
-        {
-            throw new ProductException(); 
+
+        if (!$product) {
+            throw new ProductException();
         }
+
         return [
             'theme' => $theme,
             'product' => $product

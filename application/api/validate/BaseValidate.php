@@ -3,7 +3,6 @@
 namespace app\api\validate;
 
 use app\lib\exception\ParameterException;
-use think\Exception;
 use think\Validate;
 
 /**
@@ -26,13 +25,14 @@ class BaseValidate extends Validate
         $params = $request->param();
         $params['token'] = $request->header('token');
 
+//        if (!$this->batch()->check($params)) {
         if (!$this->check($params)) {
-//            $exception = new ParameterException([
-//                // $this->error有一个问题，并不是一定返回数组，需要判断
-//                'msg' => is_array($this->error) ? implode(';', $this->error) : $this->error,
-//            ]);
-//            throw $exception;
-            throw new Exception($this->getError());
+            $exception = new ParameterException([
+                // $this->error有一个问题，并不是一定返回数组，需要判断
+                'msg' => is_array($this->error) ? implode(';', $this->error) : $this->error,
+            ]);
+            throw $exception;
+//            throw new Exception($this->getError());
         }
 
         return true;
@@ -61,20 +61,12 @@ class BaseValidate extends Validate
 
     protected function isPositiveInteger($value, $rule = '', $data = '', $field = '')
     {
-        if (is_numeric($value) && is_int($value + 0) && ($value + 0) > 0) {
-            return true;
-        }
-
-        return $field . '必须是正整数';
+        return is_numeric($value) && is_int($value + 0) && ($value + 0) > 0;
     }
 
     protected function isNotEmpty($value, $rule = '', $data = '', $field = '')
     {
-        if (empty($value)) {
-            return $field . '不允许为空';
-        } else {
-            return true;
-        }
+        return !empty($value);
     }
 
     //没有使用TP的正则验证，集中在一处方便以后修改

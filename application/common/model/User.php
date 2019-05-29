@@ -1,8 +1,7 @@
 <?php
 
-namespace app\api\model;
+namespace app\common\model;
 
-use think\Model;
 
 class User extends BaseModel
 {
@@ -25,8 +24,8 @@ class User extends BaseModel
      */
     public static function getByOpenID($openid)
     {
-        $user = User::where('openid', '=', $openid)
-            ->find();
+        $user = User::where('openid', '=', $openid)->find();
+
         return $user;
     }
 }

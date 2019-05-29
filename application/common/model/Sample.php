@@ -1,10 +1,8 @@
 <?php
 
-namespace app\api\model;
+namespace app\common\model;
 
-use think\Model;
-
-class Sample extends Model
+class Sample extends BaseModel
 {
 
 }

@@ -23,15 +23,14 @@ class ExceptionHandler extends Handle
             $this->errorCode = $e->errorCode;
         } else {
             // 如果是开发模式，则使用 tp5 默认的验证机制
-            if (config('app_debug')) {
+            if (config('app.app_debug')) {
                 return parent::render($e);
             } else {
                 $this->code = 500;
                 $this->msg = 'Internal Server Error';
                 $this->errorCode = 999;
-
                 // 记录日志
-                $this->recordErrorLog($e);
+//                $this->recordErrorLog($e);
             }
         }
 
@@ -50,10 +49,10 @@ class ExceptionHandler extends Handle
     {
         \Log::init([
             'type' => 'File',
-            'path' => LOG_PATH,
+            'path' => env('root_path') . 'log' . DIRECTORY_SEPARATOR,
             'level' => ['error'],
         ]);
 
-        \Log::record($e->getMessage(), 'error');
+        \Log::error($e->getMessage());
     }
 }

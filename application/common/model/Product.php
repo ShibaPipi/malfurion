@@ -1,15 +1,11 @@
 <?php
 
-namespace app\api\model;
-
-use think\Model;
+namespace app\common\model;
 
 class Product extends BaseModel
 {
     protected $autoWriteTimestamp = 'datetime';
-    protected $hidden = [
-        'delete_time', 'main_img_id', 'pivot', 'from', 'category_id',
-        'create_time', 'update_time'];
+    protected $hidden = ['delete_time', 'main_img_id', 'from', 'category_id', 'create_time', 'update_time'];
 
     /**
      * 图片属性
@@ -24,7 +20,6 @@ class Product extends BaseModel
         return $this->prefixImgUrl($value, $data);
     }
 
-
     public function properties()
     {
         return $this->hasMany('ProductProperty', 'product_id', 'id');
@@ -38,17 +33,13 @@ class Product extends BaseModel
      * @param bool $paginate
      * @return \think\Paginator
      */
-    public static function getProductsByCategoryID(
-        $categoryID, $paginate = true, $page = 1, $size = 30)
+    public static function getProductsByCategoryID($categoryID, $paginate = true, $page = 1, $size = 30)
     {
-        $query = self::
-        where('category_id', '=', $categoryID);
-        if (!$paginate)
-        {
+        $query = self::where('category_id', '=', $categoryID);
+
+        if (!$paginate) {
             return $query->select();
-        }
-        else
-        {
+        } else {
             // paginate 第二参数true表示采用简洁模式，简洁模式不需要查询记录总数
             return $query->paginate(
                 $size, true, [
@@ -72,23 +63,18 @@ class Product extends BaseModel
         //            ->find($id);
         //        return $product;
 
-        $product = self::with(
-            [
-                'imgs' => function ($query)
-                {
-                    $query->with(['imgUrl'])
-                        ->order('order', 'asc');
-                }])
-            ->with('properties')
-            ->find($id);
+        $product = self::with([
+            'imgs' => function ($query) {
+                $query->with(['imgUrl'])->order('order', 'asc');
+            }])->with('properties')->find($id);
+
         return $product;
     }
 
     public static function getMostRecent($count)
     {
-        $products = self::limit($count)
-            ->order('create_time desc')
-            ->select();
+        $products = self::limit($count)->order('create_time desc')->select();
+
         return $products;
     }
 
