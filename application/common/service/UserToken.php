@@ -27,7 +27,10 @@ class UserToken extends Token
     public function get()
     {
         $result = curl_get($this->wxLoginUrl);
+//        halt($this->wxLoginUrl);
+
         $wxResult = json_decode($result, true);
+
         if (empty($wxResult)) {
             throw new Exception('获取session_key及openid时异常，微信内部错误');
         } else {

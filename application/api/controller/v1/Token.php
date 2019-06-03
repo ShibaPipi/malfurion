@@ -15,6 +15,7 @@ class Token
     {
         (new TokenGet())->goCheck();
         $userToken = new UserToken($code);
+//        halt($code);
         $token = $userToken->get();
 
         return [
