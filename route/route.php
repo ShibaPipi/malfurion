@@ -9,9 +9,11 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
-//Route::get('think', function () {
-//    return 'hello,ThinkPHP5!';
-//});
+Route::get('think', function () {
+    return 'hello,ThinkPHP5!';
+});
+
+\think\facade\Route::get('index', 'index/index/index');
 // 路由配置优先级高于默认的 "模块 -> 控制器 -> 方法" 的路由访问方式
 //Route::get('index/index/hello', 'index/index');
 //Route::post('index/index/hello', 'index/index');
