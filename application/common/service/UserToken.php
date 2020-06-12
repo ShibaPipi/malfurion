@@ -24,6 +24,11 @@ class UserToken extends Token
 
     }
 
+    /**
+     * @return string
+     * @throws Exception
+     * @throws WeChatException
+     */
     public function get()
     {
         $result = curl_get($this->wxLoginUrl);
@@ -43,6 +48,11 @@ class UserToken extends Token
         }
     }
 
+    /**
+     * @param $wxResult
+     * @return string
+     * @throws TokenException
+     */
     private function grantToken($wxResult)
     {
         // 拿到openid
@@ -65,6 +75,12 @@ class UserToken extends Token
         return $token;
     }
 
+    /**
+     * @param $cachedValue
+     * @return string
+     * @throws Exception
+     * @throws TokenException
+     */
     private function saveToCache($cachedValue)
     {
         $key = self::generateToken();
@@ -102,6 +118,11 @@ class UserToken extends Token
         return $user->id;
     }
 
+    /**
+     * @param $wxResult
+     * @throws Exception
+     * @throws WeChatException
+     */
     private function processLoginError($wxResult)
     {
         throw new WeChatException([

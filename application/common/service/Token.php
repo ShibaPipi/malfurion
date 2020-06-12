@@ -10,7 +10,11 @@ use think\Exception;
 
 class Token
 {
-    // 生成令牌
+    /**
+     * 生成令牌
+     *
+     * @return string
+     */
     public static function generateToken()
     {
         $randChar = getRandChar(32);
@@ -19,10 +23,17 @@ class Token
         return md5($randChar . $timestamp . $tokenSalt);
     }
 
-    //验证token是否合法或者是否过期
-    //验证器验证只是token验证的一种方式
-    //另外一种方式是使用行为拦截token，根本不让非法token
-    //进入控制器
+    /**
+     * 验证token是否合法或者是否过期
+     * 验证器验证只是token验证的一种方式
+     * 另外一种方式是使用行为拦截token，根本不让非法token
+     * 进入控制器
+     *
+     * @return bool
+     * @throws Exception
+     * @throws ForbiddenException
+     * @throws TokenException
+     */
     public static function needPrimaryScope()
     {
         $scope = self::getCurrentTokenVar('scope');
@@ -38,7 +49,14 @@ class Token
         }
     }
 
-    // 用户专有权限
+    /**
+     * 用户专有权限
+     *
+     * @return bool
+     * @throws Exception
+     * @throws ForbiddenException
+     * @throws TokenException
+     */
     public static function needExclusiveScope()
     {
         $scope = self::getCurrentTokenVar('scope');
@@ -54,6 +72,12 @@ class Token
         }
     }
 
+    /**
+     * @return bool
+     * @throws Exception
+     * @throws ForbiddenException
+     * @throws TokenException
+     */
     public static function needSuperScope()
     {
         $scope = self::getCurrentTokenVar('scope');
@@ -69,6 +93,12 @@ class Token
         }
     }
 
+    /**
+     * @param $key
+     * @return mixed
+     * @throws Exception
+     * @throws TokenException
+     */
     public static function getCurrentTokenVar($key)
     {
         $token = \Request::instance()->header('token');
@@ -90,6 +120,7 @@ class Token
 
     /**
      * 从缓存中获取当前用户指定身份标识
+     *
      * @param array $keys
      * @return array result
      * @throws \app\lib\exception\TokenException
@@ -116,14 +147,19 @@ class Token
     }
 
     /**
-     * 当需要获取全局UID时，应当调用此方法
-     *而不应当自己解析UID
+     * 当需要获取全局 UID 时，应当调用此方法
+     * 而不应当自己解析 UID
      *
+     * @return mixed
+     * @throws Exception
+     * @throws ParameterException
+     * @throws TokenException
      */
     public static function getCurrentUid()
     {
         $uid = self::getCurrentTokenVar('uid');
         $scope = self::getCurrentTokenVar('scope');
+
         if ($scope == ScopeEnum::Super) {
             // 只有Super权限才可以自己传入uid
             // 且必须在get参数中，post不接受任何uid字段
@@ -152,6 +188,7 @@ class Token
         if (!$checkedUID) {
             throw new Exception('检查UID时必须传入一个被检查的UID');
         }
+
         $currentOperateUID = self::getCurrentUid();
 
         if ($currentOperateUID == $checkedUID) {
@@ -161,14 +198,12 @@ class Token
         return false;
     }
 
+    /**
+     * @param $token
+     * @return mixed
+     */
     public static function verifyToken($token)
     {
-        $exist = \Cache::get($token);
-
-        if ($exist) {
-            return true;
-        } else {
-            return false;
-        }
+        return \Cache::get($token);
     }
 }
